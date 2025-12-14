@@ -1,0 +1,483 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Family Command Center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: stretch;
+    }
+    .board {
+      width: 100%;
+      max-width: 1200px;
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      grid-template-rows: auto auto;
+      gap: 1rem;
+    }
+    .card {
+      background: #020617;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #1e293b;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .card h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card h2 span.label {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      color: #9ca3af;
+    }
+    .card-body {
+      flex: 1;
+      overflow: auto;
+    }
+    /* Calendar */
+    #calendar-iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 300px;
+      border: 0;
+      border-radius: 0.5rem;
+      background: #020617;
+    }
+    /* Kanban */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .kanban-column {
+      background: #020617;
+      border-radius: 0.5rem;
+      border: 1px dashed #1f2937;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+    }
+    .kanban-column h3 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+    .kanban-items {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .kanban-item {
+      background: #111827;
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid #1f2937;
+      cursor: grab;
+    }
+    .kanban-item small {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.65rem;
+      color: #9ca3af;
+    }
+    .kanban-add {
+      margin-top: 0.4rem;
+      display: flex;
+      gap: 0.25rem;
+    }
+    .kanban-add input {
+      flex: 1;
+      padding: 0.25rem 0.4rem;
+      border-radius: 0.4rem;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.75rem;
+    }
+    .btn {
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #111827;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    /* Grocery & Quick Notes */
+    .flex-row {
+      display: flex;
+      gap: 0.75rem;
+      height: 100%;
+    }
+    .panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #020617;
+      border-radius: 0.5rem;
+      border: 1px dashed #1f2937;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .panel h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #9ca3af;
+      margin-bottom: 0.25rem;
+    }
+    .list-input-row {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 0.35rem;
+    }
+    .list-input-row input {
+      flex: 1;
+      padding: 0.25rem 0.4rem;
+      border-radius: 0.4rem;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.75rem;
+    }
+    .list {
+      flex: 1;
+      overflow: auto;
+    }
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+      border-bottom: 1px solid #111827;
+      font-size: 0.78rem;
+    }
+    .list-item label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .list-item input[type="checkbox"] {
+      accent-color: #22c55e;
+    }
+    .list-item button {
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    textarea {
+      flex: 1;
+      resize: none;
+      border-radius: 0.5rem;
+      padding: 0.4rem;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.78rem;
+    }
+    .status-bar {
+      margin-top: 0.25rem;
+      font-size: 0.7rem;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .board {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <!-- Calendar -->
+    <section class="card" style="grid-column: 1 / -1;">
+      <h2>
+        Family Calendar
+        <span class="label">Google Calendar embed</span>
+      </h2>
+      <div class="card-body">
+        <!-- Replace src with your Google Calendar embed URL -->
+        <iframe
+          id="calendar-iframe"
+          src="https://calendar.google.com/calendar/embed?src=your_family_calendar_url_here&ctz=America%2FNew_York">
+        </iframe>
+      </div>
+    </section>
+
+    <!-- Kanban -->
+    <section class="card">
+      <h2>
+        Family Kanban
+        <span class="label">To‑Do · Doing · Done</span>
+      </h2>
+      <div class="card-body">
+        <div class="kanban" id="kanban-board">
+          <div class="kanban-column" data-column="todo">
+            <h3>To‑Do</h3>
+            <div class="kanban-items" id="kanban-todo"></div>
+            <div class="kanban-add">
+              <input type="text" id="kanban-todo-input" placeholder="Add task…" />
+              <button class="btn" onclick="addKanbanItem('todo')">+</button>
+            </div>
+          </div>
+          <div class="kanban-column" data-column="doing">
+            <h3>Doing</h3>
+            <div class="kanban-items" id="kanban-doing"></div>
+            <div class="kanban-add">
+              <input type="text" id="kanban-doing-input" placeholder="Add task…" />
+              <button class="btn" onclick="addKanbanItem('doing')">+</button>
+            </div>
+          </div>
+          <div class="kanban-column" data-column="done">
+            <h3>Done</h3>
+            <div class="kanban-items" id="kanban-done"></div>
+            <div class="kanban-add">
+              <input type="text" id="kanban-done-input" placeholder="Add task…" />
+              <button class="btn" onclick="addKanbanItem('done')">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grocery + Notes -->
+    <section class="card">
+      <h2>
+        Lists & Notes
+        <span class="label">Groceries · Reminders</span>
+      </h2>
+      <div class="card-body">
+        <div class="flex-row">
+          <!-- Grocery -->
+          <div class="panel">
+            <h3>Grocery List</h3>
+            <div class="list-input-row">
+              <input type="text" id="grocery-input" placeholder="Add item…" />
+              <button class="btn" onclick="addGroceryItem()">+</button>
+            </div>
+            <div class="list" id="grocery-list"></div>
+          </div>
+          <!-- Quick Notes -->
+          <div class="panel">
+            <h3>Quick Notes</h3>
+            <textarea id="quick-notes" placeholder="Notes, reminders, meal ideas…"></textarea>
+            <div class="status-bar">
+              <span id="notes-status">Saved</span>
+              <button class="btn" onclick="clearNotes()">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // --- LocalStorage Keys ---
+    const STORAGE_KEYS = {
+      KANBAN: 'family_kanban',
+      GROCERY: 'family_grocery',
+      NOTES: 'family_notes'
+    };
+
+    // --- Utility ---
+    function saveState(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function loadState(key, fallback) {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+
+    // --- Kanban ---
+    let kanbanState = loadState(STORAGE_KEYS.KANBAN, {
+      todo: [{ text: "Family meeting Sunday", label: "All" }],
+      doing: [],
+      done: []
+    });
+
+    function renderKanban() {
+      ['todo', 'doing', 'done'].forEach(col => {
+        const container = document.getElementById('kanban-' + col);
+        container.innerHTML = '';
+        kanbanState[col].forEach((item, index) => {
+          const div = document.createElement('div');
+          div.className = 'kanban-item';
+          div.draggable = true;
+          div.dataset.column = col;
+          div.dataset.index = index;
+          div.innerHTML = `
+            ${item.text}
+            <small>${item.label || ''}</small>
+          `;
+          attachKanbanDragEvents(div);
+          container.appendChild(div);
+        });
+      });
+      saveState(STORAGE_KEYS.KANBAN, kanbanState);
+    }
+
+    function addKanbanItem(column) {
+      const input = document.getElementById('kanban-' + column + '-input');
+      const text = input.value.trim();
+      if (!text) return;
+      kanbanState[column].push({ text, label: '' });
+      input.value = '';
+      renderKanban();
+    }
+
+    function attachKanbanDragEvents(el) {
+      el.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+          column: el.dataset.column,
+          index: el.dataset.index
+        }));
+      });
+    }
+
+    document.querySelectorAll('.kanban-column').forEach(colEl => {
+      colEl.addEventListener('dragover', e => {
+        e.preventDefault();
+      });
+      colEl.addEventListener('drop', e => {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const fromCol = data.column;
+        const fromIndex = parseInt(data.index, 10);
+        const toCol = colEl.dataset.column;
+        const item = kanbanState[fromCol].splice(fromIndex, 1)[0];
+        kanbanState[toCol].push(item);
+        renderKanban();
+      });
+    });
+
+    // --- Grocery List ---
+    let groceryState = loadState(STORAGE_KEYS.GROCERY, []);
+
+    function renderGrocery() {
+      const list = document.getElementById('grocery-list');
+      list.innerHTML = '';
+      groceryState.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'list-item';
+        row.innerHTML = `
+          <label>
+            <input type="checkbox" ${item.checked ? 'checked' : ''} data-index="${index}" />
+            <span style="${item.checked ? 'text-decoration: line-through; color:#6b7280;' : ''}">${item.text}</span>
+          </label>
+          <button data-index="${index}" title="Remove">&times;</button>
+        `;
+        list.appendChild(row);
+      });
+
+      list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', e => {
+          const idx = parseInt(e.target.dataset.index, 10);
+          groceryState[idx].checked = e.target.checked;
+          saveState(STORAGE_KEYS.GROCERY, groceryState);
+          renderGrocery();
+        });
+      });
+
+      list.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const idx = parseInt(e.target.dataset.index, 10);
+          groceryState.splice(idx, 1);
+          saveState(STORAGE_KEYS.GROCERY, groceryState);
+          renderGrocery();
+        });
+      });
+
+      saveState(STORAGE_KEYS.GROCERY, groceryState);
+    }
+
+    function addGroceryItem() {
+      const input = document.getElementById('grocery-input');
+      const text = input.value.trim();
+      if (!text) return;
+      groceryState.push({ text, checked: false });
+      input.value = '';
+      renderGrocery();
+    }
+
+    // --- Notes ---
+    const notesEl = document.getElementById('quick-notes');
+    const notesStatus = document.getElementById('notes-status');
+    let notesSaveTimeout = null;
+
+    function loadNotes() {
+      const saved = loadState(STORAGE_KEYS.NOTES, '');
+      notesEl.value = saved;
+    }
+
+    function scheduleNotesSave() {
+      notesStatus.textContent = 'Saving…';
+      if (notesSaveTimeout) clearTimeout(notesSaveTimeout);
+      notesSaveTimeout = setTimeout(() => {
+        saveState(STORAGE_KEYS.NOTES, notesEl.value);
+        notesStatus.textContent = 'Saved';
+      }, 400);
+    }
+
+    notesEl.addEventListener('input', scheduleNotesSave);
+
+    function clearNotes() {
+      if (!confirm('Clear all notes?')) return;
+      notesEl.value = '';
+      saveState(STORAGE_KEYS.NOTES, '');
+      notesStatus.textContent = 'Cleared';
+      setTimeout(() => (notesStatus.textContent = 'Saved'), 800);
+    }
+
+    // --- Init ---
+    renderKanban();
+    renderGrocery();
+    loadNotes();
+  </script>
+</body>
+</html>
